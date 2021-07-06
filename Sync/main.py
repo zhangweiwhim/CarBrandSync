@@ -18,9 +18,11 @@ logging.basicConfig(level=logging.DEBUG,
                     )
 
 
-def job():
+def job(dif):
+    logging.debug(dif + "开始执行同步")
     try:
-        path = 'car_bas.txt'
+        path = 'car_base.txt'
+        # path = '/usr/share/elasticsearch/plugins/analysis-hanlp/data/dictionary/custom/ShanghaiPlaceName.txt'
         # 获取字典文件中的品牌
         file_already = codecs.open(path, 'r', 'utf-8')
         lines = file_already.readlines()
@@ -28,16 +30,14 @@ def job():
         file_already.close()
         # print df_lines
         # 获取数据库中的品牌
-        # engine = create_engine('mysql+pymysql://root:12345678@localhost:3306/testdb')
-        # engine_dev = create_engine('mysql+pymysql://mid_dev:67YHGB5tg@10.42.3.205:3306/car?charset=utf8', encoding='utf-8')
-        engine_uat = create_engine('mysql+pymysql://car:qxCMwdQhav@119.3.77.221:3306/car?charset=utf8',
-                                   encoding='utf-8')
+        # engine_pro = create_engine('mysql+pymysql://car:34refwasdf@10.88.2.30:3306/car?charset=utf8', encoding='utf-8')
+        # engine_uat = create_engine('mysql+pymysql://car:qxCMwdQhav@119.3.77.221:3306/car?charset=utf8',encoding='utf-8')
+        engine_uat = None
         sql_query = 'select  distinct name  from car_brand;'
 
         df_sql = pd.read_sql_query(sql_query, engine_uat)
         # 求差集
         df_all = pd.concat([df_sql, df_lines, df_lines]).drop_duplicates(keep=False)
-        print '-------------------'
         # print df_all
         # append到词典文件文件中
         df_all.to_csv(path, header=False, index=False, encoding='utf-8', mode='a')
@@ -48,7 +48,7 @@ def job():
 
 
 if __name__ == '__main__':
-    logging.debug("开始执行同步")
-    schedule.every().day.at('23:50').do(job)
+    job('初始化')
+    s = '定时' + str(datetime.datetime.now())
     while True:
         schedule.run_pending()
